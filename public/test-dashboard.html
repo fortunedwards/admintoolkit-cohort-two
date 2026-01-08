@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard Test</title>
+</head>
+<body>
+    <h1>Dashboard Test Page</h1>
+    <p>If you can see this, the dashboard route is working.</p>
+    <script>
+        console.log('Dashboard test page loaded');
+        fetch('/api/progress')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Progress API response:', data);
+                document.body.innerHTML += '<p>API Response: ' + JSON.stringify(data) + '</p>';
+            })
+            .catch(error => {
+                console.error('API Error:', error);
+                document.body.innerHTML += '<p>API Error: ' + error.message + '</p>';
+            });
+    </script>
+</body>
+</html>

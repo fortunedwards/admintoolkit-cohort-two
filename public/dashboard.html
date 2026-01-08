@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CFi Digital Productivity Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<link href="modal-styles.css" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101c22",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.5s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200">
+<div class="relative min-h-screen">
+<header class="sticky top-0 z-50 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm">
+<div class="container mx-auto flex items-center justify-between whitespace-nowrap border-b border-primary/20 px-4 py-3 sm:px-6 lg:px-8">
+<div class="flex items-center gap-3">
+<img src="/cfi-logo.png" alt="CFI Logo" class="h-8 w-8">
+<h2 class="text-lg font-bold text-slate-800 dark:text-white">CFi Ideation Team</h2>
+</div>
+<div class="hidden items-center gap-2 md:flex">
+<div class="h-10 w-10 rounded-full bg-primary text-white flex items-center justify-center text-sm font-semibold" id="student-avatar"></div>
+<button class="flex h-10 min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary px-4 text-sm font-bold text-white transition-colors hover:bg-primary/90" onclick="logout()">
+<span class="truncate">Logout</span>
+</button>
+</div>
+
+</div>
+</header>
+<main class="container mx-auto flex-1 px-4 py-8 sm:px-6 lg:px-8">
+<div class="flex flex-col items-center gap-6 mb-8 text-center">
+<div class="relative">
+<svg class="h-40 w-40" height="120" width="120">
+<circle class="text-slate-200 dark:text-slate-700" cx="60" cy="60" fill="transparent" r="52" stroke="currentColor" stroke-width="10"></circle>
+<circle class="progress-ring__circle text-primary" cx="60" cy="60" fill="transparent" r="52" stroke="currentColor" stroke-linecap="round" stroke-width="10" id="progress-ring"></circle>
+</svg>
+<div class="h-32 w-32 rounded-full bg-primary text-white flex items-center justify-center text-sm font-semibold absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-4 border-background-light dark:border-background-dark" id="student-avatar-large"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="text-2xl font-bold text-slate-900 dark:text-white" id="progress-percentage">0%</span>
+</div>
+</div>
+<div class="flex flex-col">
+<h2 class="text-3xl font-bold text-slate-900 dark:text-white" id="welcome-title">Welcome back!</h2>
+<p class="text-slate-500 dark:text-slate-400">Keep up the great work and stay motivated.</p>
+</div>
+</div>
+<div class="sticky top-[65px] z-10 mb-6 sm:mb-8 rounded-xl bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md shadow-lg border border-slate-200 dark:border-slate-800 p-4 sm:p-6" id="continue-learning">
+<div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+<div class="flex-grow min-w-0">
+<p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Continue Learning</p>
+<h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white leading-tight" id="current-week-title">Loading...</h3>
+<p class="text-sm text-slate-600 dark:text-slate-300 mt-1 line-clamp-2" id="current-week-desc">Loading course content...</p>
+</div>
+<button class="flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg bg-primary px-4 sm:px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary/80 active:bg-primary/90 transition-colors min-h-[44px]" id="continue-btn" onclick="continueCurrentWeek()">
+<span class="material-symbols-outlined">play_arrow</span>
+<span>Continue</span>
+</button>
+</div>
+</div>
+<div class="space-y-4">
+<h3 class="px-2 sm:px-4 text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Course Overview</h3>
+<div class="flow-root">
+<ul class="space-y-3 sm:space-y-4" role="list" id="course-timeline">
+<!-- Timeline will be populated by JavaScript -->
+</ul>
+</div>
+</div>
+
+</main>
+
+</div>
+
+<!-- Week Modal -->
+<div class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm p-2 sm:p-4" id="week-modal" onclick="closeModalOnBackdrop(event)">
+<div class="w-full max-w-4xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 shadow-2xl transform transition-all duration-300 scale-95 opacity-0" id="modal-container">
+<!-- Modal Header -->
+<div class="sticky top-0 bg-gradient-to-r from-primary/5 to-blue-50 dark:from-slate-800 dark:to-slate-900 border-b border-slate-100 dark:border-slate-700 px-4 sm:px-8 py-4 sm:py-6">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3 sm:gap-4 min-w-0">
+<div class="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-primary text-lg sm:text-xl">school</span>
+</div>
+<div class="min-w-0">
+<h2 class="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white truncate" id="modal-title"></h2>
+<p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400" id="modal-subtitle">CFi Ideation Team</p>
+</div>
+</div>
+<button class="group p-2 sm:p-3 hover:bg-white/80 dark:hover:bg-slate-800/80 rounded-xl sm:rounded-2xl transition-all duration-200 hover:scale-105 flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center" onclick="closeModal()" aria-label="Close modal">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 text-lg sm:text-xl">close</span>
+</button>
+</div>
+</div>
+<!-- Modal Body -->
+<div class="overflow-y-auto max-h-[calc(98vh-100px)] sm:max-h-[calc(95vh-120px)] custom-scrollbar" id="modal-body">
+<div class="p-4 sm:p-8">
+<!-- Modal content will be populated by JavaScript -->
+</div>
+</div>
+</div>
+</div>
+
+<div id="message" class="fixed top-4 right-4 z-50 hidden rounded-lg p-4 text-white shadow-lg"></div>
+
+<script src="dashboard.js"></script>
+<script>
+// Override the showMessage function to use the new design
+function showMessage(text, type = 'success') {
+    const messageDiv = document.getElementById('message');
+    messageDiv.textContent = text;
+    messageDiv.className = `fixed top-4 right-4 z-50 rounded-lg p-4 text-white shadow-lg ${
+        type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    }`;
+    messageDiv.classList.remove('hidden');
+    setTimeout(() => {
+        messageDiv.classList.add('hidden');
+    }, 3000);
+}
+
+// renderWeeks function is now handled by dashboard.js
+
+// Welcome message and avatar updates are handled in dashboard.js
+</script>
+
+</body>
+</html>
