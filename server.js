@@ -302,7 +302,10 @@ async function initializeDatabase() {
 }
 
 // Initialize database on startup
-initializeDatabase();
+initializeDatabase().catch(err => {
+  console.error('Failed to initialize database:', err);
+  process.exit(1);
+});
 
 // Middleware
 app.use(express.json());
@@ -738,6 +741,16 @@ app.get('/api/health', async (req, res) => {
       database: 'PostgreSQL',
       nodeEnv: process.env.NODE_ENV
     });
+  }
+});
+
+app.get('/api/init-db', async (req, res) => {
+  try {
+    await initializeDatabase();
+    res.json({ success: true, message: 'Database initialized successfully' });
+  } catch (err) {
+    console.error('Manual DB init error:', err);
+    res.json({ success: false, error: err.message });
   }
 });
 
