@@ -50,8 +50,13 @@ function toggleMobileMenu() {
 
 // Tab Management
 function showTab(tab) {
+    console.log('Switching to tab:', tab);
+    
     // Hide all sections
-    document.querySelectorAll('[id$="-section"]').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('[id$="-section"]').forEach(el => {
+        console.log('Hiding section:', el.id);
+        el.classList.add('hidden');
+    });
     
     // Remove active class from all nav items
     document.querySelectorAll('nav a').forEach(el => {
@@ -60,8 +65,12 @@ function showTab(tab) {
     });
     
     // Show selected section
-    if (document.getElementById(`${tab}-section`)) {
-        document.getElementById(`${tab}-section`).classList.remove('hidden');
+    const targetSection = document.getElementById(`${tab}-section`);
+    if (targetSection) {
+        console.log('Showing section:', `${tab}-section`);
+        targetSection.classList.remove('hidden');
+    } else {
+        console.error('Section not found:', `${tab}-section`);
     }
     
     const activeNav = document.getElementById(`${tab}-nav`);
