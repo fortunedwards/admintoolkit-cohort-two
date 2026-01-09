@@ -310,7 +310,6 @@ initializeDatabase().catch(err => {
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
 app.use('/uploads', express.static(uploadDir));
 app.use(session({
   secret: process.env.SESSION_SECRET || 'cfi-admin-toolkit-2024-secure-key',
@@ -348,6 +347,9 @@ app.get('/dashboard.html', (req, res) => {
 app.get('/intro.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'intro.html'));
 });
+
+// Static files AFTER HTML routes
+app.use(express.static('public'));
 
 app.get('/admin-access', (req, res) => {
   res.send(`
