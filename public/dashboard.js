@@ -583,10 +583,15 @@ async function submitAssignmentFile(event, weekNumber) {
 
 
 async function logout() {
+    console.log('Logout function called');
     try {
-        await fetch('/logout', { method: 'POST' });
+        console.log('Sending logout request...');
+        const response = await fetch('/logout', { method: 'POST' });
+        console.log('Logout response:', response.status);
+        console.log('Redirecting to home...');
         window.location.href = '/';
     } catch (error) {
+        console.error('Logout error:', error);
         window.location.href = '/';
     }
 }
