@@ -10,22 +10,6 @@
       "dest": "/public/$1"
     },
     {
-      "src": "/login.html",
-      "dest": "/public/login.html"
-    },
-    {
-      "src": "/admin.html",
-      "dest": "/public/admin.html"
-    },
-    {
-      "src": "/dashboard.html",
-      "dest": "/public/dashboard.html"
-    },
-    {
-      "src": "/intro.html",
-      "dest": "/public/intro.html"
-    },
-    {
       "src": "/(.*)",
       "dest": "/api/index.js"
     }
