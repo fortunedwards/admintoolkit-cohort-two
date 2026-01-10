@@ -582,8 +582,17 @@ app.post('/login', async (req, res) => {
     
     req.session.studentId = student.id;
     req.session.studentName = student.name;
-    console.log('Login successful for:', student.name);
-    res.json({ success: true, message: 'Login successful' });
+    console.log('Student session set:', req.session.studentId);
+    
+    // Save session explicitly
+    req.session.save((err) => {
+      if (err) {
+        console.error('Student session save error:', err);
+        return res.json({ success: false, message: 'Session error' });
+      }
+      console.log('Student login successful, session saved');
+      res.json({ success: true, message: 'Login successful' });
+    });
   } catch (err) {
     console.error('Login error:', err);
     return res.json({ success: false, message: 'Database error: ' + err.message });
@@ -826,6 +835,7 @@ app.get('/create-admin', async (req, res) => {
 
 
 app.get('/api/progress', async (req, res) => {
+  console.log('Progress request - Session studentId:', req.session.studentId);
   if (!req.session.studentId) {
     return res.json({ success: false, message: 'Not authenticated' });
   }
