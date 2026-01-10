@@ -105,11 +105,7 @@ async function initializeDatabase() {
       await db.query('INSERT INTO course_content (week, title, description, videoId) VALUES ($1, $2, $3, $4) ON CONFLICT (week) DO UPDATE SET title = $2, description = $3, videoId = $4', content);
     }
     
-    // Force update to swap Week 6 and Week 7
-    await db.query('UPDATE course_content SET title = $1, description = $2 WHERE week = 6', ['Week 6: Google Keep', 'Organize thoughts with digital note-taking, to-do lists, reminders, and idea management systems.']);
-    await db.query('UPDATE course_content SET title = $1, description = $2 WHERE week = 7', ['Week 7: Google Sheets', 'Create powerful spreadsheets, data analysis, formulas, charts, and automated reporting for business insights.']);
-    
-    console.log('✅ Course content updated to correct order for weeks 1-8');
+    console.log('✅ Course content updated to correct 6-week structure');
 
     // Create default admin (email: cfi.ideation@gmail.com, password: admintoolkit)
     try {
@@ -268,31 +264,7 @@ async function initializeDatabase() {
       await db.query('DELETE FROM progress WHERE week > 6');
       console.log('✅ Cleaned up old weeks 7-8 data, now 6-week structure');
     } catch (e) { console.log('Note: No old weeks to clean up'); }
-    
-    // Update course structure - Move Trello to Week 4
-    try {
-      await db.query(`UPDATE course_content SET 
-        title = 'Week 4: Trello',
-        description = 'Implement project management workflows, team collaboration boards, and task tracking systems for productivity.'
-        WHERE week = 4 AND title != 'Week 4: Trello'`);
-      
-      await db.query(`UPDATE course_content SET 
-        title = 'Week 5: Google Forms',
-        description = 'Create powerful online surveys, questionnaires, and data collection forms with advanced features and analytics.'
-        WHERE week = 5 AND title != 'Week 5: Google Forms'`);
-      
-      await db.query(`UPDATE course_content SET 
-        title = 'Week 6: Google Sheets',
-        description = 'Create powerful spreadsheets, data analysis, formulas, charts, and automated reporting for business insights.'
-        WHERE week = 6 AND title != 'Week 6: Google Sheets'`);
-      
-      await db.query(`UPDATE course_content SET 
-        title = 'Week 7: Google Keep',
-        description = 'Organize thoughts with digital note-taking, to-do lists, reminders, and idea management systems.'
-        WHERE week = 7 AND title != 'Week 7: Google Keep'`);
-      
-      console.log('✅ Updated course structure - Trello moved to Week 4 (v2)');
-    } catch (e) { console.log('Course structure update error:', e.message); }
+
     
   } catch (error) {
     console.error('Database initialization error:', error);
