@@ -521,7 +521,13 @@ async function deleteContent(week) {
     if (!confirm(`Delete Week ${week}?`)) return;
     
     try {
-        const response = await fetch(`/api/admin/content/${week}`, { method: 'DELETE' });
+        const token = localStorage.getItem('adminToken');
+        const response = await fetch(`/api/admin/content/${week}`, { 
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         const result = await response.json();
         
         if (result.success) {
@@ -626,9 +632,13 @@ async function approveAssignmentFromModal() {
     const feedback = document.getElementById('assignment-feedback').value;
     
     try {
+        const token = localStorage.getItem('adminToken');
         const response = await fetch('/api/admin/approve', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify({ studentId, week, feedback })
         });
         
@@ -652,9 +662,13 @@ async function rejectAssignmentFromModal() {
     const feedback = document.getElementById('assignment-feedback').value || 'Assignment rejected. Please resubmit.';
     
     try {
+        const token = localStorage.getItem('adminToken');
         const response = await fetch('/api/admin/reject-assignment', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify({ studentId, week, feedback })
         });
         
@@ -676,9 +690,13 @@ async function rejectAssignment(studentId, week) {
     const feedback = prompt('Enter feedback for rejection (optional):');
     
     try {
+        const token = localStorage.getItem('adminToken');
         const response = await fetch('/api/admin/reject-assignment', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify({ studentId, week, feedback })
         });
         
@@ -700,9 +718,13 @@ async function rejectVideo(studentId, week) {
     const feedback = prompt('Enter feedback for video rejection (optional):');
     
     try {
+        const token = localStorage.getItem('adminToken');
         const response = await fetch('/api/admin/reject-video', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify({ studentId, week, feedback })
         });
         
@@ -818,7 +840,12 @@ function changePage(page) {
 // Approve assignment
 async function viewStudentAssignments(studentId, studentName) {
     try {
-        const response = await fetch(`/api/admin/student/${studentId}`);
+        const token = localStorage.getItem('adminToken');
+        const response = await fetch(`/api/admin/student/${studentId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         const result = await response.json();
         
         if (result.success) {
