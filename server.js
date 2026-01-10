@@ -92,14 +92,12 @@ async function initializeDatabase() {
 
     // Insert default course content for Administrative Toolkit
     const defaultContent = [
-      [1, 'Week 1: Gmail', 'Master professional email management, organization, and communication strategies for efficient correspondence.', 'dQw4w9WgXcQ'],
-      [2, 'Week 2: Google Docs + Google Drive', 'Learn professional document creation, collaborative editing, and cloud file management with advanced sharing permissions.', 'dQw4w9WgXcQ'],
-      [3, 'Week 3: Google Calendar + Google Meet', 'Master scheduling, event management, and virtual meeting coordination for optimal productivity and communication.', 'dQw4w9WgXcQ'],
-      [4, 'Week 4: Trello', 'Implement project management workflows, team collaboration boards, and task tracking systems for productivity.', 'dQw4w9WgXcQ'],
-      [5, 'Week 5: Google Forms', 'Create powerful online surveys, questionnaires, and data collection forms with advanced features and analytics.', 'dQw4w9WgXcQ'],
-      [6, 'Week 6: Google Keep', 'Organize thoughts with digital note-taking, to-do lists, reminders, and idea management systems.', 'dQw4w9WgXcQ'],
-      [7, 'Week 7: Google Sheets', 'Create powerful spreadsheets, data analysis, formulas, charts, and automated reporting for business insights.', 'dQw4w9WgXcQ'],
-      [8, 'Week 8: Graduation/Closing', 'Final assessment and certification completion for Administrative Toolkit mastery.', 'dQw4w9WgXcQ']
+      [1, 'Week 1: Google Meet + Google Calendar', 'Master virtual meeting coordination and scheduling management for optimal productivity and communication.', 'dQw4w9WgXcQ'],
+      [2, 'Week 2: Google Forms + Gmail', 'Create powerful online surveys and questionnaires while mastering professional email management and communication strategies.', 'dQw4w9WgXcQ'],
+      [3, 'Week 3: Google Drive + Google Docs', 'Learn cloud file management with advanced sharing permissions and professional document creation with collaborative editing.', 'dQw4w9WgXcQ'],
+      [4, 'Week 4: Trello + Google Keep', 'Implement project management workflows with Kanban boards and organize thoughts with digital note-taking and idea management systems.', 'dQw4w9WgXcQ'],
+      [5, 'Week 5: Google Sheets', 'Create powerful spreadsheets, data analysis, formulas, charts, and automated reporting for business insights.', 'dQw4w9WgXcQ'],
+      [6, 'Week 6: Grace Week/Graduation', 'Final assessment, project completion, and certification for Administrative Toolkit mastery.', 'dQw4w9WgXcQ']
     ];
     
     // Force update to correct order - always update existing records
@@ -264,11 +262,11 @@ async function initializeDatabase() {
       console.log('Email verification column check error:', e.message);
     }
     
-    // Clean up old 10-week structure - remove weeks 9 and 10
+    // Clean up old structure - remove weeks 7 and 8, keep only 6 weeks
     try {
-      await db.query('DELETE FROM course_content WHERE week > 8');
-      await db.query('DELETE FROM progress WHERE week > 8');
-      console.log('✅ Cleaned up old weeks 9-10 data');
+      await db.query('DELETE FROM course_content WHERE week > 6');
+      await db.query('DELETE FROM progress WHERE week > 6');
+      console.log('✅ Cleaned up old weeks 7-8 data, now 6-week structure');
     } catch (e) { console.log('Note: No old weeks to clean up'); }
     
     // Update course structure - Move Trello to Week 4
@@ -529,8 +527,8 @@ app.post('/register', async (req, res) => {
     const studentId = result.rows[0].id;
     console.log('Student created with ID:', studentId);
     
-    // Initialize progress for all 8 weeks
-    for (let week = 1; week <= 8; week++) {
+    // Initialize progress for all 6 weeks
+    for (let week = 1; week <= 6; week++) {
       try {
         await db.query('INSERT INTO progress (student_id, week) VALUES ($1, $2)', [studentId, week]);
       } catch (progressError) {
@@ -886,7 +884,7 @@ async function ensureProgressRecords(studentId) {
     const existingWeekNumbers = result.rows.map(w => w.week);
     const missingWeeks = [];
     
-    for (let week = 1; week <= 8; week++) {
+    for (let week = 1; week <= 6; week++) {
       if (!existingWeekNumbers.includes(week)) {
         missingWeeks.push(week);
       }
