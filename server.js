@@ -1089,9 +1089,12 @@ app.post('/admin/login', async (req, res) => {
 });
 
 app.get('/admin', (req, res) => {
+  console.log('Admin dashboard access - Session adminId:', req.session.adminId);
   if (!req.session.adminId) {
-    return res.redirect('/');
+    console.log('No admin session, redirecting to admin-access');
+    return res.redirect('/admin-access');
   }
+  console.log('Admin session valid, serving dashboard');
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
