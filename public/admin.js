@@ -10,7 +10,23 @@ const assignmentsPerPage = 20;
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Admin dashboard loaded');
-    showTab('students');
+    
+    // Check session first
+    fetch('/api/admin/session-check')
+        .then(r => r.json())
+        .then(result => {
+            console.log('Session check result:', result);
+            if (!result.sessionExists) {
+                console.log('No admin session found, redirecting to login');
+                window.location.href = '/admin-access';
+                return;
+            }
+            showTab('students');
+        })
+        .catch(err => {
+            console.error('Session check failed:', err);
+            window.location.href = '/admin-access';
+        });
     
     // Add search functionality
     const searchInput = document.getElementById('student-search');

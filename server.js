@@ -1100,6 +1100,15 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
+app.get('/api/admin/session-check', (req, res) => {
+  console.log('Session check - adminId:', req.session.adminId);
+  console.log('Full session:', req.session);
+  res.json({ 
+    adminId: req.session.adminId || null,
+    sessionExists: !!req.session.adminId 
+  });
+});
+
 app.get('/api/admin/students', async (req, res) => {
   console.log('Admin students request - Session adminId:', req.session.adminId);
   if (!req.session.adminId) return res.json({ success: false, message: 'Not authorized' });
