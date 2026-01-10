@@ -6,6 +6,7 @@ const path = require('path');
 const multer = require('multer');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 
 // File upload setup
 const fs = require('fs');
@@ -31,6 +32,44 @@ const transporter = nodemailer.createTransport({
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET || 'cfi-jwt-secret-key-very-secure-2024';
+
+// JWT Authentication middleware
+function authenticateToken(req, res, next) {
+  const token = req.headers.authorization?.split(' ')[1] || req.cookies?.token;
+  
+  if (!token) {
+    return res.status(401).json({ success: false, message: 'No token provided' });
+  }
+  
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ success: false, message: 'Invalid token' });
+  }
+}
+
+// Admin authentication middleware
+function authenticateAdmin(req, res, next) {
+  const token = req.headers.authorization?.split(' ')[1] || req.cookies?.adminToken;
+  
+  if (!token) {
+    return res.status(401).json({ success: false, message: 'No admin token provided' });
+  }
+  
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Not authorized' });
+    }
+    req.admin = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ success: false, message: 'Invalid admin token' });
+  }
+}
 
 // Database setup
 const db = new Pool({
@@ -535,39 +574,22 @@ app.post('/register', async (req, res) => {
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
   
-  console.log('Login attempt for:', email);
-  
   try {
     const result = await db.query('SELECT * FROM students WHERE email = $1', [email]);
-    console.log('Database query result:', result.rows.length, 'students found');
     const student = result.rows[0];
     
-    if (!student) {
-      console.log('No student found with email:', email);
+    if (!student || !await bcrypt.compare(password, student.password)) {
       return res.json({ success: false, message: 'Invalid credentials' });
     }
     
-    console.log('Student found:', student.name);
-    const validPassword = await bcrypt.compare(password, student.password);
-    console.log('Password validation result:', validPassword);
+    const token = jwt.sign(
+      { id: student.id, name: student.name, role: 'student' },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
     
-    if (!validPassword) {
-      return res.json({ success: false, message: 'Invalid credentials' });
-    }
-    
-    req.session.studentId = student.id;
-    req.session.studentName = student.name;
-    console.log('Student session set:', req.session.studentId);
-    
-    // Save session explicitly
-    req.session.save((err) => {
-      if (err) {
-        console.error('Student session save error:', err);
-        return res.json({ success: false, message: 'Session error' });
-      }
-      console.log('Student login successful, session saved');
-      res.json({ success: true, message: 'Login successful' });
-    });
+    res.cookie('token', token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
+    res.json({ success: true, message: 'Login successful', token });
   } catch (err) {
     console.error('Login error:', err);
     return res.json({ success: false, message: 'Database error: ' + err.message });
@@ -821,20 +843,14 @@ app.get('/cleanup-old-weeks', async (req, res) => {
 
 
 
-app.get('/api/progress', async (req, res) => {
-  console.log('Progress request - Session studentId:', req.session.studentId);
-  if (!req.session.studentId) {
-    return res.json({ success: false, message: 'Not authenticated' });
-  }
-  
+app.get('/api/progress', authenticateToken, async (req, res) => {
   try {
-    // Ensure progress records exist before fetching
-    await ensureProgressRecords(req.session.studentId);
+    await ensureProgressRecords(req.user.id);
     
     const result = await db.query('SELECT * FROM progress WHERE student_id = $1 ORDER BY week', 
-      [req.session.studentId]);
+      [req.user.id]);
     
-    res.json({ success: true, progress: result.rows, studentName: req.session.studentName });
+    res.json({ success: true, progress: result.rows, studentName: req.user.name });
   } catch (err) {
     console.error('Progress fetch error:', err);
     return res.json({ success: false, message: 'Error fetching progress' });
@@ -1051,65 +1067,40 @@ app.get('/api/course-content', async (req, res) => {
 app.post('/admin/login', async (req, res) => {
   const { email, password } = req.body;
   
-  console.log('Admin login attempt:', email);
-  
   try {
     const result = await db.query('SELECT * FROM admins WHERE email = $1', [email]);
-    console.log('Admin query result:', result.rows.length);
-    
     const admin = result.rows[0];
     
-    if (!admin) {
-      console.log('Admin not found');
+    if (!admin || !await bcrypt.compare(password, admin.password)) {
       return res.json({ success: false, message: 'Invalid credentials' });
     }
     
-    console.log('Admin found, checking password');
-    const validPassword = await bcrypt.compare(password, admin.password);
-    console.log('Password valid:', validPassword);
+    const token = jwt.sign(
+      { id: admin.id, email: admin.email, role: 'admin' },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
     
-    if (!validPassword) {
-      return res.json({ success: false, message: 'Invalid credentials' });
-    }
-    
-    req.session.adminId = admin.id;
-    console.log('Admin session set:', req.session.adminId);
-    
-    // Save session explicitly
-    req.session.save((err) => {
-      if (err) {
-        console.error('Session save error:', err);
-        return res.json({ success: false, message: 'Session error' });
-      }
-      console.log('Admin login successful, session saved');
-      res.json({ success: true, message: 'Admin login successful' });
-    });
+    res.cookie('adminToken', token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
+    res.json({ success: true, message: 'Admin login successful', token });
   } catch (err) {
     console.error('Admin login error:', err);
     return res.json({ success: false, message: 'Database error: ' + err.message });
   }
 });
 
-app.get('/admin', async (req, res) => {
-  console.log('Admin dashboard access - Session adminId:', req.session.adminId);
-  console.log('Full session object:', req.session);
+app.get('/admin', (req, res) => {
+  const token = req.cookies?.adminToken;
+  if (!token) {
+    return res.redirect('/admin-access');
+  }
   
-  // Force session reload
-  req.session.reload((err) => {
-    if (err) {
-      console.log('Session reload error:', err);
-    }
-    
-    console.log('After reload - Session adminId:', req.session.adminId);
-    
-    if (!req.session.adminId) {
-      console.log('No admin session, redirecting to admin-access');
-      return res.redirect('/admin-access');
-    }
-    
-    console.log('Admin session valid, serving dashboard');
+  try {
+    jwt.verify(token, JWT_SECRET);
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-  });
+  } catch (err) {
+    res.redirect('/admin-access');
+  }
 });
 
 app.get('/api/admin/session-check', (req, res) => {
@@ -1121,10 +1112,7 @@ app.get('/api/admin/session-check', (req, res) => {
   });
 });
 
-app.get('/api/admin/students', async (req, res) => {
-  console.log('Admin students request - Session adminId:', req.session.adminId);
-  if (!req.session.adminId) return res.json({ success: false, message: 'Not authorized' });
-  
+app.get('/api/admin/students', authenticateAdmin, async (req, res) => {
   try {
     const result = await db.query(`SELECT s.id, s.name, s.email, s.created_at,
       COALESCE(COUNT(CASE WHEN p.approved = TRUE THEN 1 END), 0) as approved
@@ -1133,7 +1121,6 @@ app.get('/api/admin/students', async (req, res) => {
       GROUP BY s.id, s.name, s.email, s.created_at
       ORDER BY s.created_at DESC`);
     
-    console.log('Students found:', result.rows.length);
     res.json({ success: true, students: result.rows || [] });
   } catch (err) {
     console.error('Database error in /api/admin/students:', err);
