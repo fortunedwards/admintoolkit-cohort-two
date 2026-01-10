@@ -97,7 +97,7 @@ async function initializeDatabase() {
       [3, 'Week 3: Google Drive + Google Docs', 'Learn cloud file management with advanced sharing permissions and professional document creation with collaborative editing.', 'dQw4w9WgXcQ'],
       [4, 'Week 4: Trello + Google Keep', 'Implement project management workflows with Kanban boards and organize thoughts with digital note-taking and idea management systems.', 'dQw4w9WgXcQ'],
       [5, 'Week 5: Google Sheets', 'Create powerful spreadsheets, data analysis, formulas, charts, and automated reporting for business insights.', 'dQw4w9WgXcQ'],
-      [6, 'Week 6: Grace Week/Graduation', 'Final assessment, project completion, and certification for Administrative Toolkit mastery.', 'dQw4w9WgXcQ']
+      [6, 'Week 6: Graduation Week', 'Final assessment, project completion, and certification for Administrative Toolkit mastery.', 'dQw4w9WgXcQ']
     ];
     
     // Force update to correct order - always update existing records

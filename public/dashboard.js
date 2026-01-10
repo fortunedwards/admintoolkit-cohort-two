@@ -21,9 +21,9 @@ async function loadCourseContent() {
             courseContent.forEach(content => {
                 // Determine type based on actual content
                 let type = 'class';
-                if (content.week === 8) {
+                if (content.week === 6) {
                     type = 'certification';
-                } else if (content.week >= 1 && content.week <= 7) {
+                } else if (content.week >= 1 && content.week <= 5) {
                     type = 'class';
                 }
                            
@@ -160,16 +160,14 @@ function updateCourseTimeline() {
     const timeline = document.getElementById('course-timeline');
     timeline.innerHTML = '';
     
-    // Tool logos mapping
+    // Tool logos mapping for 6-week structure
     const toolLogos = {
-        1: 'https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico',
-        2: 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico',
-        3: 'https://calendar.google.com/googlecalendar/images/favicons_2020q4/calendar_31.ico',
-        4: 'https://cdn.worldvectorlogo.com/logos/trello.svg',
-        5: 'https://www.gstatic.com/images/branding/product/1x/forms_2020q4_48dp.png',
-        6: 'https://www.gstatic.com/keep/icon_2020q4v2_128.png',
-        7: 'https://ssl.gstatic.com/docs/spreadsheets/favicon_jfk2.png',
-        8: 'https://fonts.gstatic.com/s/i/productlogos/admin_2020q4/v6/web-512dp/logo_admin_2020q4_color_2x_web_512dp.png'
+        1: 'https://calendar.google.com/googlecalendar/images/favicons_2020q4/calendar_31.ico', // Meet + Calendar
+        2: 'https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico', // Forms + Gmail
+        3: 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico', // Drive + Docs
+        4: 'https://cdn.worldvectorlogo.com/logos/trello.svg', // Trello + Keep
+        5: 'https://ssl.gstatic.com/docs/spreadsheets/favicon_jfk2.png', // Sheets
+        6: 'https://fonts.gstatic.com/s/i/productlogos/admin_2020q4/v6/web-512dp/logo_admin_2020q4_color_2x_web_512dp.png' // Graduation
     };
     
     // Display individual weeks with enhanced design
@@ -406,7 +404,7 @@ function openWeekModal(weekNumber) {
                 <div class="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-2xl p-8 border border-yellow-100 dark:border-yellow-800/30">
                     <div class="text-center">
                         <div class="text-6xl mb-4">🎓</div>
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Final Certification</h3>
+                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Graduation Week</h3>
                         <p class="text-gray-600 dark:text-gray-400 mb-6">Complete your final assessment to earn your Administrative Toolkit certificate</p>
                         
                         <div class="space-y-6">
