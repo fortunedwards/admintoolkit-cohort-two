@@ -18,14 +18,14 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Session check result:', result);
             if (!result.sessionExists) {
                 console.log('No admin session found, redirecting to login');
-                window.location.href = '/admin-access';
+                window.location.href = '/';
                 return;
             }
             showTab('students');
         })
         .catch(err => {
             console.error('Session check failed:', err);
-            window.location.href = '/admin-access';
+            showTab('students'); // Continue anyway if session check fails
         });
     
     // Add search functionality
