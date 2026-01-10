@@ -379,7 +379,7 @@ function openWeekModal(weekNumber) {
                                     ${week.assignment_file ? `<div class="mt-3 flex items-center gap-2 text-sm text-green-600 dark:text-green-400"><span class="material-symbols-outlined text-sm">attach_file</span><span>${week.assignment_file}</span></div>` : ''}
                                 </div>
                                 
-                                <div class="text-center text-sm text-gray-500 dark:text-gray-400 font-medium">OR</div>
+                                <div class="text-center text-sm text-gray-500 dark:text-gray-400 font-medium">AND/OR</div>
                                 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Share Link</label>
@@ -522,11 +522,6 @@ async function submitAssignmentFile(event, weekNumber) {
     
     if (!hasFile && !hasLink) {
         showMessage('Please provide either a file or a link', 'error');
-        return;
-    }
-    
-    if (hasFile && hasLink) {
-        showMessage('Please provide either a file OR a link, not both', 'error');
         return;
     }
     
