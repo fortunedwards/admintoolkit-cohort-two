@@ -1075,8 +1075,17 @@ app.post('/admin/login', async (req, res) => {
     }
     
     req.session.adminId = admin.id;
-    console.log('Admin login successful');
-    res.json({ success: true, message: 'Admin login successful' });
+    console.log('Admin session set:', req.session.adminId);
+    
+    // Save session explicitly
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.json({ success: false, message: 'Session error' });
+      }
+      console.log('Admin login successful, session saved');
+      res.json({ success: true, message: 'Admin login successful' });
+    });
   } catch (err) {
     console.error('Admin login error:', err);
     return res.json({ success: false, message: 'Database error: ' + err.message });
@@ -1091,6 +1100,7 @@ app.get('/admin', (req, res) => {
 });
 
 app.get('/api/admin/students', async (req, res) => {
+  console.log('Admin students request - Session adminId:', req.session.adminId);
   if (!req.session.adminId) return res.json({ success: false, message: 'Not authorized' });
   
   try {
