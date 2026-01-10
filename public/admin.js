@@ -9,6 +9,7 @@ const assignmentsPerPage = 20;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('Admin dashboard loaded');
     showTab('students');
     
     // Add search functionality
@@ -107,18 +108,23 @@ function showTab(tab) {
 
 // Students
 async function loadStudents() {
+    console.log('Loading students...');
     try {
         const response = await fetch('/api/admin/students');
+        console.log('Students response status:', response.status);
         const result = await response.json();
+        console.log('Students result:', result);
         
         if (result.success) {
             originalStudentsData = result.students.sort((a, b) => a.name.localeCompare(b.name));
             studentsData = [...originalStudentsData];
             renderStudents();
         } else {
-            showMessage('Failed to load students', 'error');
+            console.error('Failed to load students:', result.message);
+            showMessage('Failed to load students: ' + result.message, 'error');
         }
     } catch (error) {
+        console.error('Error loading students:', error);
         showMessage('Error loading students', 'error');
     }
 }
