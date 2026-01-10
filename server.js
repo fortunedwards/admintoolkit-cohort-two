@@ -1090,14 +1090,26 @@ app.post('/admin/login', async (req, res) => {
   }
 });
 
-app.get('/admin', (req, res) => {
+app.get('/admin', async (req, res) => {
   console.log('Admin dashboard access - Session adminId:', req.session.adminId);
-  if (!req.session.adminId) {
-    console.log('No admin session, redirecting to admin-access');
-    return res.redirect('/admin-access');
-  }
-  console.log('Admin session valid, serving dashboard');
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+  console.log('Full session object:', req.session);
+  
+  // Force session reload
+  req.session.reload((err) => {
+    if (err) {
+      console.log('Session reload error:', err);
+    }
+    
+    console.log('After reload - Session adminId:', req.session.adminId);
+    
+    if (!req.session.adminId) {
+      console.log('No admin session, redirecting to admin-access');
+      return res.redirect('/admin-access');
+    }
+    
+    console.log('Admin session valid, serving dashboard');
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+  });
 });
 
 app.get('/api/admin/session-check', (req, res) => {
