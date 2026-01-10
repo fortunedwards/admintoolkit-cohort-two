@@ -368,6 +368,8 @@ app.get('/admin-access', (req, res) => {
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Admin Login - CFi Ideation Team</title>
+    <link rel="icon" type="image/png" href="/cfi-logo.png"/>
+    <link rel="apple-touch-icon" href="/cfi-logo.png"/>
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet"/>
