@@ -325,14 +325,15 @@ app.use(express.static('public', {
 
 app.use(session({
   secret: process.env.SESSION_SECRET || 'cfi-admin-toolkit-2024-secure-key',
-  resave: false,
-  saveUninitialized: false,
+  resave: true,
+  saveUninitialized: true,
   cookie: { 
-    secure: false, // Disable secure for now to test
+    secure: false,
     httpOnly: true,
     maxAge: 7 * 24 * 60 * 60 * 1000,
     sameSite: 'lax'
-  }
+  },
+  name: 'cfi.session.id'
 }));
 
 // Routes for static files
