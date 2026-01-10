@@ -209,7 +209,12 @@ function renderStudents() {
 
 async function viewStudent(id) {
     try {
-        const response = await fetch(`/api/admin/student/${id}`);
+        const token = localStorage.getItem('adminToken');
+        const response = await fetch(`/api/admin/student/${id}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         const result = await response.json();
         
         if (result.success) {
@@ -310,7 +315,13 @@ async function deleteStudent(id, name) {
     if (!confirm(`Delete student "${name}"? This action cannot be undone.`)) return;
     
     try {
-        const response = await fetch(`/api/admin/student/${id}`, { method: 'DELETE' });
+        const token = localStorage.getItem('adminToken');
+        const response = await fetch(`/api/admin/student/${id}`, { 
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         const result = await response.json();
         
         if (result.success) {
@@ -854,9 +865,13 @@ async function approveAssignment(studentId, week) {
     const feedback = prompt('Enter feedback (optional):');
     
     try {
+        const token = localStorage.getItem('adminToken');
         const response = await fetch('/api/admin/approve', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify({ studentId, week, feedback })
         });
         
