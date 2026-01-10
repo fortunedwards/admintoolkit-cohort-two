@@ -719,4 +719,13 @@ function generateVideoSection(weekInfo, weekNumber) {
 }
 
 // Load progress when page loads
-document.addEventListener('DOMContentLoaded', loadProgress);
+document.addEventListener('DOMContentLoaded', () => {
+    // Check for valid token first
+    const token = localStorage.getItem('studentToken');
+    if (!token) {
+        console.log('No student token found, redirecting to login');
+        window.location.href = '/login.html';
+        return;
+    }
+    loadProgress();
+});

@@ -587,7 +587,12 @@ app.post('/login', async (req, res) => {
       { expiresIn: '24h' }
     );
     
-    res.cookie('token', token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
+    res.cookie('token', token, { 
+      httpOnly: false, 
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: 'lax',
+      secure: false
+    });
     res.json({ success: true, message: 'Login successful', token });
   } catch (err) {
     console.error('Login error:', err);
@@ -750,17 +755,8 @@ app.post('/reset-password', async (req, res) => {
 });
 
 app.get('/dashboard', (req, res) => {
-  const token = req.cookies?.token;
-  if (!token) {
-    return res.redirect('/login.html');
-  }
-  
-  try {
-    jwt.verify(token, JWT_SECRET);
-    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
-  } catch (err) {
-    res.redirect('/login.html');
-  }
+  // Send the dashboard page and let JavaScript handle token validation
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
 app.get('/test-dashboard', (req, res) => {
@@ -1076,7 +1072,12 @@ app.post('/admin/login', async (req, res) => {
       { expiresIn: '24h' }
     );
     
-    res.cookie('adminToken', token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
+    res.cookie('adminToken', token, { 
+      httpOnly: false, 
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: 'lax',
+      secure: false
+    });
     res.json({ success: true, message: 'Admin login successful', token });
   } catch (err) {
     console.error('Admin login error:', err);
@@ -1085,17 +1086,8 @@ app.post('/admin/login', async (req, res) => {
 });
 
 app.get('/admin', (req, res) => {
-  const token = req.cookies?.adminToken;
-  if (!token) {
-    return res.redirect('/admin-access');
-  }
-  
-  try {
-    jwt.verify(token, JWT_SECRET);
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-  } catch (err) {
-    res.redirect('/admin-access');
-  }
+  // Send the admin page and let JavaScript handle token validation
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
 app.get('/api/admin/session-check', authenticateAdmin, (req, res) => {
