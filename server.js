@@ -335,6 +335,34 @@ app.use(session({
   }
 }));
 
+// Routes for static files
+app.get('/admin.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.sendFile(path.join(__dirname, 'public', 'admin.js'));
+});
+
+app.get('/dashboard.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.js'));
+});
+
+app.get('/modal-styles.css', (req, res) => {
+  res.setHeader('Content-Type', 'text/css');
+  res.sendFile(path.join(__dirname, 'public', 'modal-styles.css'));
+});
+
+app.get('/cfi-logo.png', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'cfi-logo.png'));
+});
+
+app.get('/hephzibah.jpg', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'hephzibah.jpg'));
+});
+
+app.get('/fortune.jpg', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'fortune.jpg'));
+});
+
 // Routes
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
