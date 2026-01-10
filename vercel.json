@@ -6,8 +6,15 @@
   },
   "routes": [
     {
-      "src": "/(.*\\.(png|jpg|jpeg|gif|svg|ico|css|js))",
+      "src": "/(.*\\.(png|jpg|jpeg|gif|svg|ico))",
       "dest": "/public/$1"
+    },
+    {
+      "src": "/(.*\\.(css|js))",
+      "dest": "/public/$1",
+      "headers": {
+        "Content-Type": "text/css; charset=utf-8"
+      }
     },
     {
       "src": "/(.*)",
