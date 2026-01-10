@@ -465,7 +465,10 @@ app.get('/admin-access', (req, res) => {
                 const result = await response.json();
                 
                 if (result.success) {
-                    window.location.href = '/admin';
+                    // Wait a bit for session to be saved, then redirect
+                    setTimeout(() => {
+                        window.location.href = '/admin';
+                    }, 500);
                 } else {
                     showMessage(result.message, 'error');
                 }
