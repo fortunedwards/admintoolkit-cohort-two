@@ -521,7 +521,7 @@ async function submitAssignmentFile(event, weekNumber) {
     const hasLink = linkInput.value.trim() !== '';
     
     if (!hasFile && !hasLink) {
-        showMessage('Please provide either a file or a link', 'error');
+        showMessage('Please provide a file and/or a link', 'error');
         return;
     }
     

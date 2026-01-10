@@ -936,7 +936,7 @@ app.post('/api/submit-assignment', authenticateToken, upload.single('file'), asy
   const fileName = req.file ? req.file.filename : null;
   
   if (!fileName && !link) {
-    return res.json({ success: false, message: 'Please provide either a file or a link' });
+    return res.json({ success: false, message: 'Please provide a file and/or a link' });
   }
   
   try {
