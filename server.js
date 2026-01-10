@@ -903,12 +903,12 @@ async function ensureProgressRecords(studentId) {
   }
 }
 
-app.post('/api/watch-video', async (req, res) => {
+app.post('/api/watch-video', authenticateToken, async (req, res) => {
   const { week } = req.body;
   
   try {
     await db.query('UPDATE progress SET video_watched = TRUE WHERE student_id = $1 AND week = $2',
-      [req.session.studentId, week]);
+      [req.user.id, week]);
     
     res.json({ success: true, message: 'Video marked as watched' });
   } catch (err) {
@@ -917,12 +917,12 @@ app.post('/api/watch-video', async (req, res) => {
   }
 });
 
-app.post('/api/update-video-progress', async (req, res) => {
+app.post('/api/update-video-progress', authenticateToken, async (req, res) => {
   const { week, progress, timeSpent } = req.body;
   
   try {
     await db.query('UPDATE progress SET video_progress = $1, time_spent = time_spent + $2, video_watched = $3 WHERE student_id = $4 AND week = $5',
-      [progress, timeSpent || 0, progress >= 0.9, req.session.studentId, week]);
+      [progress, timeSpent || 0, progress >= 0.9, req.user.id, week]);
     
     res.json({ success: true });
   } catch (err) {
@@ -966,9 +966,7 @@ app.post('/api/submit-assignment', authenticateToken, upload.single('file'), asy
 });
 
 // Get assignments for admin review
-app.get('/api/admin/assignments', async (req, res) => {
-  if (!req.session.adminId) return res.json({ success: false, message: 'Not authorized' });
-  
+app.get('/api/admin/assignments', authenticateAdmin, async (req, res) => {
   try {
     const result = await db.query(`
       SELECT DISTINCT s.id as student_id, s.name as student_name, s.email as student_email,
@@ -989,9 +987,7 @@ app.get('/api/admin/assignments', async (req, res) => {
 });
 
 // Download assignment file
-app.get('/api/admin/assignment/:studentId/:week/download', async (req, res) => {
-  if (!req.session.adminId) return res.status(401).json({ success: false, message: 'Not authorized' });
-  
+app.get('/api/admin/assignment/:studentId/:week/download', authenticateAdmin, async (req, res) => {
   const { studentId, week } = req.params;
   
   try {
@@ -1011,9 +1007,7 @@ app.get('/api/admin/assignment/:studentId/:week/download', async (req, res) => {
 });
 
 // Reject assignment
-app.post('/api/admin/reject-assignment', async (req, res) => {
-  if (!req.session.adminId) return res.json({ success: false, message: 'Not authorized' });
-  
+app.post('/api/admin/reject-assignment', authenticateAdmin, async (req, res) => {
   const { studentId, week, feedback } = req.body;
   
   try {
@@ -1028,9 +1022,7 @@ app.post('/api/admin/reject-assignment', async (req, res) => {
 });
 
 // Reject video progress
-app.post('/api/admin/reject-video', async (req, res) => {
-  if (!req.session.adminId) return res.json({ success: false, message: 'Not authorized' });
-  
+app.post('/api/admin/reject-video', authenticateAdmin, async (req, res) => {
   const { studentId, week, feedback } = req.body;
   
   try {
@@ -1160,12 +1152,8 @@ app.post('/api/admin/approve', authenticateAdmin, async (req, res) => {
   }
 });
 
-app.post('/api/admin/batch-approve', async (req, res) => {
-  if (!req.session.adminId) {
-    return res.json({ success: false, message: 'Not authorized' });
-  }
-  
-  const { approvals } = req.body; // Array of {studentId, week, feedback}
+app.post('/api/admin/batch-approve', authenticateAdmin, async (req, res) => {
+  const { approvals } = req.body;
   
   const client = await db.connect();
   
@@ -1259,13 +1247,10 @@ app.post('/api/admin/content', authenticateAdmin, async (req, res) => {
 
 
 // Delete student endpoint
-app.delete('/api/admin/student/:id', async (req, res) => {
-  if (!req.session.adminId) return res.json({ success: false, message: 'Not authorized' });
-  
+app.delete('/api/admin/student/:id', authenticateAdmin, async (req, res) => {
   const studentId = req.params.id;
   
   try {
-    // Delete student progress first, then student
     await db.query('DELETE FROM progress WHERE student_id = $1', [studentId]);
     const result = await db.query('DELETE FROM students WHERE id = $1 RETURNING name', [studentId]);
     
@@ -1281,9 +1266,7 @@ app.delete('/api/admin/student/:id', async (req, res) => {
 });
 
 // Delete all students endpoint
-app.delete('/api/admin/students/all', async (req, res) => {
-  if (!req.session.adminId) return res.json({ success: false, message: 'Not authorized' });
-  
+app.delete('/api/admin/students/all', authenticateAdmin, async (req, res) => {
   try {
     await db.query('DELETE FROM progress');
     await db.query('DELETE FROM students');
@@ -1296,9 +1279,7 @@ app.delete('/api/admin/students/all', async (req, res) => {
 });
 
 // Delete content endpoint
-app.delete('/api/admin/content/:week', async (req, res) => {
-  if (!req.session.adminId) return res.json({ success: false, message: 'Not authorized' });
-  
+app.delete('/api/admin/content/:week', authenticateAdmin, async (req, res) => {
   const week = req.params.week;
   
   try {
@@ -1311,9 +1292,7 @@ app.delete('/api/admin/content/:week', async (req, res) => {
 });
 
 // Add new content endpoint
-app.post('/api/admin/content/new', async (req, res) => {
-  if (!req.session.adminId) return res.json({ success: false, message: 'Not authorized' });
-  
+app.post('/api/admin/content/new', authenticateAdmin, async (req, res) => {
   const { week, title, description, videoId, courseDescription, logoUrl, assignmentQuestion, imageIcon } = req.body;
   const videoIds = req.body.videoIds || videoId;
   
@@ -1321,7 +1300,6 @@ app.post('/api/admin/content/new', async (req, res) => {
     await db.query('INSERT INTO course_content (week, title, description, videoId, videoIds, courseDescription, logoUrl, assignmentQuestion, imageIcon) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
       [week, title, description, videoId, videoIds, courseDescription, logoUrl, assignmentQuestion, imageIcon]);
     
-    // Initialize progress for all students for this new week
     const studentsResult = await db.query('SELECT id FROM students');
     for (const student of studentsResult.rows) {
       await db.query('INSERT INTO progress (student_id, week) VALUES ($1, $2)', [student.id, week]);
@@ -1330,7 +1308,7 @@ app.post('/api/admin/content/new', async (req, res) => {
     res.json({ success: true, message: 'Content created successfully' });
   } catch (err) {
     console.error('Create content error:', err);
-    if (err.code === '23505') { // Unique constraint violation
+    if (err.code === '23505') {
       return res.json({ success: false, message: 'Week already exists' });
     }
     return res.json({ success: false, message: 'Error creating content' });

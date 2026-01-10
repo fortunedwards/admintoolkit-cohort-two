@@ -525,7 +525,12 @@ async function deleteContent(week) {
 // Assignments
 async function loadAssignments() {
     try {
-        const response = await fetch('/api/admin/assignments');
+        const token = localStorage.getItem('adminToken');
+        const response = await fetch('/api/admin/assignments', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         const result = await response.json();
         
         if (result.success) {
