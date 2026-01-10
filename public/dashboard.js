@@ -52,7 +52,12 @@ async function loadProgress() {
         await loadCourseContent();
         
         console.log('Fetching progress...');
-        const response = await fetch('/api/progress');
+        const token = localStorage.getItem('studentToken');
+        const response = await fetch('/api/progress', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         console.log('Progress response status:', response.status);
         
         if (response.status === 401 || response.status === 403) {
@@ -481,9 +486,13 @@ function closeModalOnBackdrop(event) {
 
 async function markVideoComplete(weekNumber) {
     try {
+        const token = localStorage.getItem('studentToken');
         const response = await fetch('/api/mark-video-complete', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify({ week: weekNumber })
         });
         
@@ -556,8 +565,12 @@ async function submitAssignmentFile(event, weekNumber) {
     submitButton.textContent = hasFile ? 'Uploading...' : 'Submitting...';
     
     try {
+        const token = localStorage.getItem('studentToken');
         const response = await fetch('/api/submit-assignment', {
             method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
             body: formData
         });
         

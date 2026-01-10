@@ -46,6 +46,7 @@ async function login(event) {
         const result = await response.json();
         
         if (result.success) {
+            localStorage.setItem('studentToken', result.token);
             window.location.href = '/dashboard';
         } else {
             showMessage(result.message, 'error');

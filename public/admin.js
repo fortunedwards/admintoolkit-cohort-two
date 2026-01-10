@@ -12,20 +12,31 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Admin dashboard loaded');
     
     // Check session first
-    fetch('/api/admin/session-check')
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+        console.log('No admin token found, redirecting to login');
+        window.location.href = '/admin-access';
+        return;
+    }
+    
+    fetch('/api/admin/session-check', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
         .then(r => r.json())
         .then(result => {
             console.log('Session check result:', result);
             if (!result.sessionExists) {
                 console.log('No admin session found, redirecting to login');
-                window.location.href = '/';
+                window.location.href = '/admin-access';
                 return;
             }
             showTab('students');
         })
         .catch(err => {
             console.error('Session check failed:', err);
-            showTab('students'); // Continue anyway if session check fails
+            window.location.href = '/admin-access';
         });
     
     // Add search functionality
@@ -126,7 +137,12 @@ function showTab(tab) {
 async function loadStudents() {
     console.log('Loading students...');
     try {
-        const response = await fetch('/api/admin/students');
+        const token = localStorage.getItem('adminToken');
+        const response = await fetch('/api/admin/students', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         console.log('Students response status:', response.status);
         const result = await response.json();
         console.log('Students result:', result);
@@ -312,7 +328,12 @@ async function deleteStudent(id, name) {
 async function loadContent() {
     console.log('Loading content...');
     try {
-        const response = await fetch('/api/admin/content');
+        const token = localStorage.getItem('adminToken');
+        const response = await fetch('/api/admin/content', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         console.log('Content response status:', response.status);
         const result = await response.json();
         console.log('Content result:', result);
@@ -389,7 +410,12 @@ function showContentModal(week = null) {
     
     if (week) {
         // Edit mode
-        fetch(`/api/admin/content/${week}`)
+        const token = localStorage.getItem('adminToken');
+        fetch(`/api/admin/content/${week}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
             .then(r => r.json())
             .then(result => {
                 if (result.success) {
@@ -452,9 +478,13 @@ async function saveContent(event) {
     console.log('Saving content data:', data);
     
     try {
+        const token = localStorage.getItem('adminToken');
         const response = await fetch('/api/admin/content', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify(data)
         });
         

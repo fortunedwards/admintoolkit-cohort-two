@@ -507,8 +507,7 @@ app.get('/admin-access', (req, res) => {
                 const result = await response.json();
                 
                 if (result.success) {
-                    // Store session info and redirect
-                    sessionStorage.setItem('adminLoggedIn', 'true');
+                    localStorage.setItem('adminToken', result.token);
                     window.location.href = '/admin';
                 } else {
                     showMessage(result.message, 'error');
@@ -751,13 +750,17 @@ app.post('/reset-password', async (req, res) => {
 });
 
 app.get('/dashboard', (req, res) => {
-  console.log('Dashboard access attempt. Session:', req.session.studentId ? 'exists' : 'missing');
-  if (!req.session.studentId) {
-    console.log('No session found, redirecting to login');
+  const token = req.cookies?.token;
+  if (!token) {
     return res.redirect('/login.html');
   }
-  console.log('Session valid, serving dashboard');
-  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+  
+  try {
+    jwt.verify(token, JWT_SECRET);
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+  } catch (err) {
+    res.redirect('/login.html');
+  }
 });
 
 app.get('/test-dashboard', (req, res) => {
@@ -857,22 +860,18 @@ app.get('/api/progress', authenticateToken, async (req, res) => {
   }
 });
 
-app.post('/api/mark-video-complete', async (req, res) => {
+app.post('/api/mark-video-complete', authenticateToken, async (req, res) => {
   const { week, videoNumber } = req.body;
   
-  if (!req.session.studentId) {
-    return res.json({ success: false, message: 'Not authenticated' });
-  }
-  
   try {
-    await ensureProgressRecords(req.session.studentId);
+    await ensureProgressRecords(req.user.id);
     
     if (videoNumber === 2) {
       await db.query('UPDATE progress SET video2_watched = TRUE WHERE student_id = $1 AND week = $2',
-        [req.session.studentId, week]);
+        [req.user.id, week]);
     } else {
       await db.query('UPDATE progress SET video_watched = TRUE WHERE student_id = $1 AND week = $2',
-        [req.session.studentId, week]);
+        [req.user.id, week]);
     }
     
     res.json({ success: true, message: 'Video marked as complete!' });
@@ -936,13 +935,9 @@ app.post('/api/update-video-progress', async (req, res) => {
   }
 });
 
-app.post('/api/submit-assignment', upload.single('file'), async (req, res) => {
+app.post('/api/submit-assignment', authenticateToken, upload.single('file'), async (req, res) => {
   const { week, link, assignmentNumber } = req.body;
   const fileName = req.file ? req.file.filename : null;
-  
-  if (!req.session.studentId) {
-    return res.json({ success: false, message: 'Not authenticated' });
-  }
   
   if (!fileName && !link) {
     return res.json({ success: false, message: 'Please provide either a file or a link' });
@@ -950,15 +945,15 @@ app.post('/api/submit-assignment', upload.single('file'), async (req, res) => {
   
   try {
     // Ensure progress record exists
-    await ensureProgressRecords(req.session.studentId);
+    await ensureProgressRecords(req.user.id);
     
     let result;
     if (assignmentNumber === '2') {
       result = await db.query('UPDATE progress SET assignment2_submitted = TRUE, assignment2_file = $1, assignment2_link = $2 WHERE student_id = $3 AND week = $4',
-        [fileName, link || null, req.session.studentId, week]);
+        [fileName, link || null, req.user.id, week]);
     } else {
       result = await db.query('UPDATE progress SET assignment_submitted = TRUE, assignment_file = $1, assignment_link = $2 WHERE student_id = $3 AND week = $4',
-        [fileName, link || null, req.session.studentId, week]);
+        [fileName, link || null, req.user.id, week]);
     }
     
     console.log('Assignment update result:', result.rowCount, 'rows affected');
@@ -1103,12 +1098,10 @@ app.get('/admin', (req, res) => {
   }
 });
 
-app.get('/api/admin/session-check', (req, res) => {
-  console.log('Session check - adminId:', req.session.adminId);
-  console.log('Full session:', req.session);
+app.get('/api/admin/session-check', authenticateAdmin, (req, res) => {
   res.json({ 
-    adminId: req.session.adminId || null,
-    sessionExists: !!req.session.adminId 
+    adminId: req.admin.id,
+    sessionExists: true 
   });
 });
 
@@ -1128,9 +1121,7 @@ app.get('/api/admin/students', authenticateAdmin, async (req, res) => {
   }
 });
 
-app.get('/api/admin/analytics', async (req, res) => {
-  if (!req.session.adminId) return res.json({ success: false, message: 'Not authorized' });
-  
+app.get('/api/admin/analytics', authenticateAdmin, async (req, res) => {
   try {
     const result = await db.query(`SELECT 
       COUNT(DISTINCT s.id) as total_students,
@@ -1148,11 +1139,7 @@ app.get('/api/admin/analytics', async (req, res) => {
   }
 });
 
-app.get('/api/admin/student/:id', async (req, res) => {
-  if (!req.session.adminId) {
-    return res.json({ success: false, message: 'Not authorized' });
-  }
-  
+app.get('/api/admin/student/:id', authenticateAdmin, async (req, res) => {
   const studentId = req.params.id;
   
   try {
@@ -1167,11 +1154,7 @@ app.get('/api/admin/student/:id', async (req, res) => {
   }
 });
 
-app.post('/api/admin/approve', async (req, res) => {
-  if (!req.session.adminId) {
-    return res.json({ success: false, message: 'Not authorized' });
-  }
-  
+app.post('/api/admin/approve', authenticateAdmin, async (req, res) => {
   const { studentId, week, feedback } = req.body;
   
   try {
@@ -1214,10 +1197,7 @@ app.post('/api/admin/batch-approve', async (req, res) => {
 });
 
 // Admin content management
-app.get('/api/admin/content', async (req, res) => {
-  console.log('Admin content request - Session adminId:', req.session.adminId);
-  if (!req.session.adminId) return res.json({ success: false, message: 'Not authorized' });
-  
+app.get('/api/admin/content', authenticateAdmin, async (req, res) => {
   try {
     const result = await db.query('SELECT * FROM course_content ORDER BY week');
     console.log('Content found:', result.rows.length, 'weeks');
@@ -1228,9 +1208,7 @@ app.get('/api/admin/content', async (req, res) => {
   }
 });
 
-app.get('/api/admin/content/:week', async (req, res) => {
-  if (!req.session.adminId) return res.json({ success: false, message: 'Not authorized' });
-  
+app.get('/api/admin/content/:week', authenticateAdmin, async (req, res) => {
   const week = req.params.week;
   
   try {
@@ -1243,9 +1221,7 @@ app.get('/api/admin/content/:week', async (req, res) => {
   }
 });
 
-app.post('/api/admin/content', async (req, res) => {
-  if (!req.session.adminId) return res.json({ success: false, message: 'Not authorized' });
-  
+app.post('/api/admin/content', authenticateAdmin, async (req, res) => {
   const { week, title, description, videoId, courseDescription, logoUrl } = req.body;
   const videoIds = req.body.videoIds || videoId; // Support both single and multiple videos
   
