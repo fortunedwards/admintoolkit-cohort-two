@@ -182,7 +182,7 @@ function renderStudents() {
     
     list.innerHTML = currentStudents.map(student => {
         const progress = student.approved || 0;
-        const progressPercent = Math.round((progress/8)*100);
+        const progressPercent = Math.round((progress/6)*100);
         return `
         <tr>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-800 dark:text-white">${student.name}</td>
@@ -238,8 +238,8 @@ async function viewStudent(id) {
                         <div class="grid grid-cols-2 gap-4 text-sm">
                             <div><span class="text-gray-500">Name:</span> ${student.name}</div>
                             <div><span class="text-gray-500">Email:</span> ${student.email}</div>
-                            <div><span class="text-gray-500">Completed:</span> ${completedWeeks}/8 weeks</div>
-                            <div><span class="text-gray-500">Submitted:</span> ${submittedWeeks}/8 assignments</div>
+                            <div><span class="text-gray-500">Completed:</span> ${completedWeeks}/6 weeks</div>
+                            <div><span class="text-gray-500">Submitted:</span> ${submittedWeeks}/6 assignments</div>
                             <div><span class="text-gray-500">Avg Video:</span> ${Math.round(avgVideoProgress * 100)}%</div>
                             <div><span class="text-gray-500">Avg Quiz:</span> ${Math.round(avgQuizScore)}%</div>
                             <div><span class="text-gray-500">Time Spent:</span> ${Math.round(totalTimeSpent / 60)} minutes</div>
@@ -582,7 +582,7 @@ function renderAssignments() {
         <tr>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-800 dark:text-white">${assignment.student_name}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400">${assignment.student_email}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400">${assignment.total_assignments}/8</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400">${assignment.total_assignments}/6</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400">${assignment.approved_assignments}/${assignment.total_assignments}</td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <button onclick="viewStudentAssignments(${assignment.student_id}, '${assignment.student_name}')" class="text-primary hover:text-primary/80">View Details</button>

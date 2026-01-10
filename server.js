@@ -1322,7 +1322,7 @@ app.post('/logout', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`\n🎓 CFi Ideation Team LMS Server running on port ${PORT}`);
-  console.log('📚 Course: 8-Week Administrative Toolkit');
+  console.log('📚 Course: 6-Week Administrative Toolkit');
   console.log('🔑 Admin login: cfi.ideation@gmail.com / admintoolkit');
   console.log('🚀 Ready for students to register and learn!\n');
 });
