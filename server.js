@@ -294,16 +294,17 @@ app.use(express.static('public', {
 }));
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'cfi-admin-toolkit-2024-secure-key',
+  secret: process.env.SESSION_SECRET || 'cfi-admin-toolkit-2024-secure-key-very-long-and-secure',
   resave: true,
   saveUninitialized: true,
+  rolling: true,
   cookie: { 
     secure: false,
     httpOnly: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
     sameSite: 'lax'
   },
-  name: 'cfi.session.id'
+  name: 'cfi-session'
 }));
 
 // Routes for static files
@@ -467,10 +468,9 @@ app.get('/admin-access', (req, res) => {
                 const result = await response.json();
                 
                 if (result.success) {
-                    // Wait a bit for session to be saved, then redirect
-                    setTimeout(() => {
-                        window.location.href = '/admin';
-                    }, 500);
+                    // Store session info and redirect
+                    sessionStorage.setItem('adminLoggedIn', 'true');
+                    window.location.href = '/admin';
                 } else {
                     showMessage(result.message, 'error');
                 }
