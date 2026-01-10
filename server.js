@@ -323,6 +323,17 @@ app.use(session({
   }
 }));
 
+// Static files with proper MIME types
+app.use(express.static('public', {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    } else if (path.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    }
+  }
+}));
+
 // Routes
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -348,8 +359,6 @@ app.get('/intro.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'intro.html'));
 });
 
-// Static files AFTER HTML routes
-app.use(express.static('public'));
 
 app.get('/admin-access', (req, res) => {
   res.send(`
