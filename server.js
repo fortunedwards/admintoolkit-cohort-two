@@ -802,6 +802,18 @@ app.get('/create-admin-force', async (req, res) => {
   }
 });
 
+app.get('/cleanup-old-weeks', async (req, res) => {
+  try {
+    // Force delete weeks 7 and 8
+    await db.query('DELETE FROM course_content WHERE week > 6');
+    await db.query('DELETE FROM progress WHERE week > 6');
+    
+    res.json({ success: true, message: 'Old weeks 7-8 deleted successfully' });
+  } catch (err) {
+    res.json({ success: false, error: err.message });
+  }
+});
+
 
 
 app.get('/api/progress', async (req, res) => {
