@@ -311,6 +311,18 @@ initializeDatabase().catch(err => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(uploadDir));
+
+// Static files FIRST with proper MIME types
+app.use(express.static('public', {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    } else if (path.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    }
+  }
+}));
+
 app.use(session({
   secret: process.env.SESSION_SECRET || 'cfi-admin-toolkit-2024-secure-key',
   resave: false,
@@ -320,17 +332,6 @@ app.use(session({
     httpOnly: true,
     maxAge: 7 * 24 * 60 * 60 * 1000,
     sameSite: 'lax'
-  }
-}));
-
-// Static files with proper MIME types
-app.use(express.static('public', {
-  setHeaders: (res, path) => {
-    if (path.endsWith('.js')) {
-      res.setHeader('Content-Type', 'application/javascript');
-    } else if (path.endsWith('.css')) {
-      res.setHeader('Content-Type', 'text/css');
-    }
   }
 }));
 
