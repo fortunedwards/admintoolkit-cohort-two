@@ -294,14 +294,21 @@ async function deleteStudent(id, name) {
 
 // Content
 async function loadContent() {
+    console.log('Loading content...');
     try {
         const response = await fetch('/api/admin/content');
+        console.log('Content response status:', response.status);
         const result = await response.json();
+        console.log('Content result:', result);
         
         if (result.success) {
             renderContent(result.content);
+        } else {
+            console.error('Failed to load content:', result.message);
+            showMessage('Failed to load content: ' + result.message, 'error');
         }
     } catch (error) {
+        console.error('Error loading content:', error);
         showMessage('Error loading content', 'error');
     }
 }

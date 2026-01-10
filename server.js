@@ -1207,10 +1207,12 @@ app.post('/api/admin/batch-approve', async (req, res) => {
 
 // Admin content management
 app.get('/api/admin/content', async (req, res) => {
+  console.log('Admin content request - Session adminId:', req.session.adminId);
   if (!req.session.adminId) return res.json({ success: false, message: 'Not authorized' });
   
   try {
     const result = await db.query('SELECT * FROM course_content ORDER BY week');
+    console.log('Content found:', result.rows.length, 'weeks');
     res.json({ success: true, content: result.rows });
   } catch (err) {
     console.error('Fetch content error:', err);
