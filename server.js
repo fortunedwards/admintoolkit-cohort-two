@@ -790,7 +790,7 @@ app.get('/debug-admin', async (req, res) => {
   }
 });
 
-app.get('/create-admin', async (req, res) => {
+app.get('/create-admin-force', async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash('admintoolkit', 10);
     await db.query('DELETE FROM admins WHERE email = $1', ['cfi.ideation@gmail.com']);
